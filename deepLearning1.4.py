@@ -409,9 +409,9 @@ class NeuralNetwork:
     
     def sgd_epoch(self, X, Y, learning_rate, batch_size):
         #shuffle data
-        #p = np.random.permutation(len(Y))
-        #X = X[p]
-        #Y = Y[p]
+        p = np.random.permutation(len(Y))
+        X = X[p]
+        Y = Y[p]
         
         
         
@@ -576,7 +576,7 @@ X_valid, Y_valid = Dval
 X_test, Y_test = Dtest
 
 # Downsample training data to make it a bit faster for testing this code
-n_train_samples = 20000
+n_train_samples = 25000
 train_idxs = np.random.permutation(X_train.shape[0])[:n_train_samples]
 X_train = X_train[train_idxs]
 Y_train = Y_train[train_idxs]
@@ -616,13 +616,13 @@ layers.append(FullyConnectedLayer(
 ))
 layers.append(FullyConnectedLayer(
                 layers[-1],
-                num_units=35,
+                num_units=15,
                 init_stddev=0.1,
                 activation_fun=Activation('relu')
 ))
 layers.append(FullyConnectedLayer(
                 layers[-1],
-                num_units=100,
+                num_units=10,
                 init_stddev=0.1,
                 # last layer has no nonlinearity 
                 # (softmax will be applied in the output layer)
@@ -637,8 +637,8 @@ t0 = time.time()
 
 
 
-nn.train(X_train, Y_train, X_valid, Y_valid, learning_rate=0.01, 
-         max_epochs=200, batch_size=512, y_one_hot=True, descent_type="sgd")
+nn.train(X_train, Y_train, X_valid, Y_valid, learning_rate=0.004, 
+         max_epochs=20, batch_size=2, y_one_hot=True, descent_type="sgd")
 t1 = time.time()
 print('Duration: {:.1f}s'.format(t1-t0))
 
