@@ -198,13 +198,9 @@ class FullyConnectedLayer(Layer, Parameterized):
         # where num_units_prev is the number of units in the input 
         # (previous) layer
         self.input_shape = input_layer.output_size()
-        # TODO ################################
-        # TODO: implement weight initialization
-        # TODO ################################
         # this is the weight matrix it should have shape: (num_units_prev, num_units)
         self.W = np.random.normal(0, init_stddev, (self.input_shape[1], self.num_units))  #FIXME
         # and this is the bias vector of shape: (num_units)
-        # CHANGE
         self.b = np.ones(self.num_units)
         # create dummy variables for parameter gradients
         # no need to change these here!
@@ -215,14 +211,6 @@ class FullyConnectedLayer(Layer, Parameterized):
         return (self.input_shape[0], self.num_units)
     
     def fprop(self, input):
-        # TODO ################################################
-        # TODO: implement forward propagation
-        # NOTE: you should also handle the case were 
-        #       activation_fun is None (meaning no activation)
-        #       then this is simply a linear layer
-        # TODO ################################################
-        # you again want to cache the last_input for the bprop
-        # implementation below!
         self.last_input = input
         #FIXME
         z = np.dot(input, self.W) + self.b
@@ -233,9 +221,6 @@ class FullyConnectedLayer(Layer, Parameterized):
         
     def bprop(self, output_grad):
         """ Calculate input gradient (backpropagation). """
-        # TODO ################################
-        # TODO: implement backward propagation
-        # TODO ###############################
         
         # HINT: you may have to divide the weights by n
         #       to make gradient checking work 
@@ -325,17 +310,11 @@ class SoftmaxOutput(Layer, Loss):
         )
     
     def input_grad(self, Y, Y_pred):
-        # TODO #######################################################
-        # TODO: implement gradient of the negative log likelihood loss
-        # TODO #######################################################
         # HINT: since this would involve taking the log 
         #       of the softmax (which is np.exp(x)/np.sum(x, axis=1))
         #       this gradient computation can be simplified a lot! 
         
-        #NOT CORRECT
         return (Y_pred-Y)/(Y.shape[0]) 
-        #GIVEN
-        #return np.zeros_like(Y_pred)
 
     def loss(self, Y, Y_pred):
         # Assume one-hot encoding of Y
@@ -344,10 +323,6 @@ class SoftmaxOutput(Layer, Loss):
         # to make the loss numerically stable 
         # you may want to add an epsilon in the log ;)
         eps = 1e-10
-        # TODO ####################################
-        # calculate negative log likelihood
-        # TODO ####################################
-        #WRONG
         loss = np.sum((-np.log(Y_pred+eps))*Y, axis=1)
         return np.mean(loss)
     
@@ -369,9 +344,6 @@ class NeuralNetwork:
 
     def predict(self, X):
         """ Calculate an output Y for the given input X. """
-        # TODO ##########################################
-        # TODO: implement forward pass through all layers
-        # TODO ##########################################
         current_input = X
         for l in self.layers:
             current_input = l.fprop(current_input)
@@ -383,19 +355,12 @@ class NeuralNetwork:
         """ Backpropagation of partial derivatives through 
             the complete network up to layer 'upto'
         """
-        #print (Y)
-        #print (Y_pred)
         next_grad = self.layers[-1].input_grad(Y, Y_pred)
         
         numLayersNotOutput = len(self.layers)-1-1
         
         for l in range (numLayersNotOutput, upto-1, -1):
             next_grad=self.layers[l].bprop(next_grad)
-        #print next_grad
-        # TODO ##########################################
-        # TODO: implement forward pass through all layers
-        # TODO ##########################################
-        #print ("Next grad is ", next_grad)
         
         return next_grad
     
@@ -408,12 +373,10 @@ class NeuralNetwork:
         return np.mean(error)
     
     def sgd_epoch(self, X, Y, learning_rate, batch_size):
-        #shuffle data
+        #shuffle data (already done, but makes me feel better)
         p = np.random.permutation(len(Y))
         X = X[p]
         Y = Y[p]
-        
-        
         
         n_samples = X.shape[0]
         n_batches = n_samples // batch_size
@@ -427,7 +390,6 @@ class NeuralNetwork:
             #FORWARD PROPOGATION
             batch = Xbatches[i]
             Y_pred = self.predict(batch)
-            #print Y_pred
             Y_actual = Ybatches[i]
             #BACKWARD PROPOGATION
             bp = self.backpropagate(Y_actual, Y_pred)
@@ -439,7 +401,6 @@ class NeuralNetwork:
             
     
     def gd_epoch(self, X, Y, learning_rate):
-        # @TOFIX
         self.sgd_epoch(X,Y,learning_rate, X.shape[0])
         pass
     
@@ -453,7 +414,7 @@ class NeuralNetwork:
             Y_train = one_hot(Y)
         else:
             Y_train = Y
-        #print("... starting training")
+        print("... starting training")
         for e in range(max_epochs+1):
             if descent_type == "sgd":
                 self.sgd_epoch(X, Y_train, learning_rate, batch_size)
@@ -472,7 +433,7 @@ class NeuralNetwork:
             
 
 #==========================================================
-#=========================NOT DONE=========================
+#=========================DONE=============================
 #==========================================================
    
     def check_gradients(self, X, Y):
@@ -516,25 +477,13 @@ class NeuralNetwork:
                     # are currently placed in the network and flatten them
                     # to a vector for convenient comparisons, printing etc.
                     param_init = np.ravel(np.copy(param))
-
-                    # TODO ####################################
-                    # TODO compute the gradient with respect to
-                    #      the initial parameters in two ways:
-                    #      1) with grad_given_params()
-                    #      2) with finite differences 
-                    #         using output_given_params()
-                    #         (as discussed in the lecture)
-                    #      if your implementation is correct 
-                    #      both results should be epsilon close
-                    #      to each other!
-                    # TODO ####################################
                     epsilon = 1e-4
                     # making sure your gradient checking routine itself 
                     # has no errors can be a bit tricky. To debug it
                     # you can "cheat" by using scipy which implements
                     # gradient checking exactly the way you should!
                     # To do that simply run the following here:
-                    import scipy.optimize
+                    #import scipy.optimize
 
                     err_scipy = scipy.optimize.check_grad(output_given_params, 
                                                    grad_given_params, param_init)
@@ -576,7 +525,7 @@ X_valid, Y_valid = Dval
 X_test, Y_test = Dtest
 
 # Downsample training data to make it a bit faster for testing this code
-n_train_samples = 25000
+n_train_samples = X_train.shape[0]
 train_idxs = np.random.permutation(X_train.shape[0])[:n_train_samples]
 X_train = X_train[train_idxs]
 Y_train = Y_train[train_idxs]
@@ -604,19 +553,19 @@ layers = [InputLayer(input_shape)]
 
 layers.append(FullyConnectedLayer(
                 layers[-1],
-                num_units=130,
+                num_units=63,
                 init_stddev=0.1,
                 activation_fun=Activation('relu')
 ))
 layers.append(FullyConnectedLayer(
                 layers[-1],
-                num_units=170,
+                num_units=120,
                 init_stddev=0.1,
                 activation_fun=Activation('relu')
 ))
 layers.append(FullyConnectedLayer(
                 layers[-1],
-                num_units=15,
+                num_units=35,
                 init_stddev=0.1,
                 activation_fun=Activation('relu')
 ))
@@ -638,7 +587,7 @@ t0 = time.time()
 
 
 nn.train(X_train, Y_train, X_valid, Y_valid, learning_rate=0.004, 
-         max_epochs=20, batch_size=2, y_one_hot=True, descent_type="sgd")
+         max_epochs=35, batch_size=2, y_one_hot=True, descent_type="sgd")
 t1 = time.time()
 print('Duration: {:.1f}s'.format(t1-t0))
 
